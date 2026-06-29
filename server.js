@@ -10,6 +10,7 @@ import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import connectDB from "./config/db.js";
 
+// Hubungkan ke Database
 await connectDB();
 
 const app = express();
@@ -18,7 +19,7 @@ const port = process.env.PORT || 4000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Middleware CORS Dinamis + Anti-Cache Vercel ll
+// Middleware CORS Dinamis + Anti-Cache Vercel Level Maksimal
 app.use((req, res, next) => {
   const allowedOrigins = [
     "http://localhost:5173",
@@ -33,8 +34,12 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
   
-  // INI BARIS SAKTINYA: Memaksa Vercel memisahkan cache untuk setiap domain
+  // --- INI BARIS PEMBUNUH CACHE YANG TADI KELEWATAN ---
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   res.setHeader("Vary", "Origin");
+  // ----------------------------------------------------
   
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
@@ -49,7 +54,6 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 
 // Routes
 app.use("/api/user", userRouter);
