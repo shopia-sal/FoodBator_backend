@@ -1,11 +1,11 @@
 import pkg from 'jsonwebtoken';
 const jwt = pkg;
-const { TokenExpiredError } = pkg;
-
 
 const authMiddleware = (req, res, next) => {
-    const token = req.cookies?.token ||
-    (req.headers.authorization && req.headers.authorization.split(' ') [1])
+    // Tambahkan 'req.headers.token' agar satpam mau menerima header 'token' dari frontend
+    const token = req.cookies?.token || 
+                  (req.headers.authorization && req.headers.authorization.split(' ')[1]) || 
+                  req.headers.token;
 
     if (!token) {
         return res.status(401).json({success: false, message: 'Token Missing'})
@@ -16,10 +16,11 @@ const authMiddleware = (req, res, next) => {
         req.user = {_id: decoded.id, email: decoded.email};
         next();
     }
-
     catch (err) {
-        const message = err.name === 'TokenExpiredError' ? 'Token expired' : 'invalide Token';
-        res.status(403).json({success: false, message})
+        // Kita ubah error-nya jadi 401, supaya frontend kamu yang sudah disetting 
+        // untuk redirect saat 401 bisa langsung jalan!
+        const message = err.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid Token';
+        res.status(401).json({success: false, message})
     }
 }
 
