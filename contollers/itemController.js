@@ -6,24 +6,21 @@ export const createItem = async (req, res, next) => {
         let imageUrl = '';
 
         if (req.file) {
-            // Format base64 yang bisa dibaca langsung oleh Cloudinary
+            // Format base64
             const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
             
             const cloudName = "dweimllm7"; 
             const uploadPreset = "foodbator_preset"; 
             
-            const uniqueName = `menu_${Date.now()}`; // Buat nama unik tanpa garis miring
-            
+            // OBAT ASLINYA: Pakai FormData, bukan JSON
+            const formData = new FormData();
+            formData.append("file", base64Image);
+            formData.append("upload_preset", uploadPreset);
+
             // Tembak gambar langsung ke server Cloudinary
             const cloudinaryResponse = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    file: base64Image,
-                    upload_preset: uploadPreset,
-                    public_id: uniqueName, // Ini parameter yang resmi diizinkan
-                    folder: "foodbator_menu" // Tambahan: Biar rapi masuk ke folder khusus di Cloudinary
-                })
+                body: formData // Langsung kirim form-nya, tanpa header JSON yang bikin error
             });
 
             const cloudinaryData = await cloudinaryResponse.json();
@@ -72,7 +69,6 @@ export const getItems = async (_req, res, next) => {
         const withFullUrl = items.map(i => {
             let finalImageUrl = i.imageUrl;
             
-            // Pengaman darurat untuk gambar lama yang pakai /uploads/
             if (finalImageUrl && finalImageUrl.startsWith('/uploads/')) {
                 finalImageUrl = host + finalImageUrl;
             }
