@@ -10,7 +10,7 @@ export const createItem = async (req, res, next) => {
             const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
             
             const cloudName = "dweimllm7"; 
-            const uploadPreset = "foodbator_preset"; // <-- GANTI JIKA KAMU PAKAI NAMA LAIN TADI
+            const uploadPreset = "foodbator_preset"; 
             
             // Tembak gambar langsung ke server Cloudinary
             const cloudinaryResponse = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
@@ -18,20 +18,22 @@ export const createItem = async (req, res, next) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     file: base64Image,
-                    upload_preset: uploadPreset
+                    upload_preset: uploadPreset,
+                    // 👇👇 INI BARIS OBATNYA 👇👇
+                    // Kita paksa Cloudinary ngasih nama otomatis pakai format menu_angkaWaktu
+                    public_id: `menu_${Date.now()}` 
                 })
             });
 
             const cloudinaryData = await cloudinaryResponse.json();
             
             if (cloudinaryData.secure_url) {
-                imageUrl = cloudinaryData.secure_url; 
+                imageUrl = cloudinaryData.secure_url; // URL gambar berhasil didapat!
             } else {
                 console.error("Cloudinary Error:", cloudinaryData);
-                // 👇 UBAH BARIS INI UNTUK MEMBOCORKAN ERROR ASLINYA 👇
                 return res.status(400).json({ 
-                    message: 'Gagal upload gambar ke Cloudinary', 
-                    alasan_asli_cloudinary: cloudinaryData.error.message // <-- Tambahan sakti
+                    message: 'Gagal upload gambar ke Cloudinary',
+                    alasan: cloudinaryData.error?.message 
                 });
             }
         }
