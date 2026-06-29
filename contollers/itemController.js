@@ -12,6 +12,8 @@ export const createItem = async (req, res, next) => {
             const cloudName = "dweimllm7"; 
             const uploadPreset = "foodbator_preset"; 
             
+            const uniqueName = `menu_${Date.now()}`; // Buat nama unik tanpa garis miring
+            
             // Tembak gambar langsung ke server Cloudinary
             const cloudinaryResponse = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
                 method: 'POST',
@@ -19,9 +21,9 @@ export const createItem = async (req, res, next) => {
                 body: JSON.stringify({
                     file: base64Image,
                     upload_preset: uploadPreset,
-                    // 👇👇 INI BARIS OBATNYA 👇👇
-                    // Kita paksa Cloudinary ngasih nama otomatis pakai format menu_angkaWaktu
-                    public_id: `menu_${Date.now()}` 
+                    public_id: uniqueName,
+                    // 👇👇👇 INI OBAT PENAWARNYA 👇👇👇
+                    display_name: uniqueName // Paksa Cloudinary pakai nama ini agar tidak error
                 })
             });
 
