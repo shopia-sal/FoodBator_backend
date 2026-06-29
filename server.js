@@ -8,6 +8,9 @@ import userRouter from "./routes/userRoute.js";
 import itemRouter from "./routes/itemRoute.js";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
+import connectDB from "./config/db.js";
+
+await connectDB();
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -47,20 +50,6 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Database Connection
-const MONGO_URL = process.env.MONGO_URL;
-
-mongoose
-  .connect(MONGO_URL, {
-    serverSelectionTimeoutMS: 10000,
-    socketTimeoutMS: 45000,
-  })
-  .then(() => {
-    console.log("✅ MongoDB connected successfully");
-  })
-  .catch((err) => {
-    console.error("❌ Failed to connect DB:", err.message);
-  });
 
 // Routes
 app.use("/api/user", userRouter);
