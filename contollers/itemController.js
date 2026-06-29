@@ -25,10 +25,14 @@ export const createItem = async (req, res, next) => {
             const cloudinaryData = await cloudinaryResponse.json();
             
             if (cloudinaryData.secure_url) {
-                imageUrl = cloudinaryData.secure_url; // URL gambar anti-blokir didapatkan!
+                imageUrl = cloudinaryData.secure_url; 
             } else {
                 console.error("Cloudinary Error:", cloudinaryData);
-                return res.status(400).json({ message: 'Gagal upload gambar ke Cloudinary' });
+                // 👇 UBAH BARIS INI UNTUK MEMBOCORKAN ERROR ASLINYA 👇
+                return res.status(400).json({ 
+                    message: 'Gagal upload gambar ke Cloudinary', 
+                    alasan_asli_cloudinary: cloudinaryData.error.message // <-- Tambahan sakti
+                });
             }
         }
 
