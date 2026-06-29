@@ -15,7 +15,7 @@ const port = process.env.PORT || 4000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Middleware CORS Dinamis (Menggantikan cors bawaan package agar tidak crash di Vercel)
+// Middleware CORS Dinamis + Anti-Cache Vercel
 app.use((req, res, next) => {
   const allowedOrigins = [
     "http://localhost:5173",
@@ -26,16 +26,17 @@ app.use((req, res, next) => {
   
   const origin = req.headers.origin;
   
-  // Jika origin request ada di dalam list allowedOrigins, berikan akses penuh
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
+  
+  // INI BARIS SAKTINYA: Memaksa Vercel memisahkan cache untuk setiap domain
+  res.setHeader("Vary", "Origin");
   
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
   
-  // Tangani preflight request (OPTIONS) dari browser secara instan
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
