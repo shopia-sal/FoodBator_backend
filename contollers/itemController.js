@@ -5,26 +5,30 @@ export const createItem = async (req, res, next) => {
         const { name, description, category, price, rating, hearts } = req.body;
         let imageUrl = '';
 
-        // Jika ada file gambar yang diupload
         if (req.file) {
-            const base64Image = req.file.buffer.toString('base64');
+            // Format base64 yang bisa dibaca langsung oleh Cloudinary
+            const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
             
-            const imgbbApiKey = "f8f26e03d026c58aaee4792bb211b0cc"; 
+            const cloudName = "dweimllm7"; 
+            const uploadPreset = "foodbator_preset"; // <-- GANTI JIKA KAMU PAKAI NAMA LAIN TADI
             
-            const formData = new URLSearchParams();
-            formData.append("image", base64Image);
-
-            const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
+            // Tembak gambar langsung ke server Cloudinary
+            const cloudinaryResponse = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    file: base64Image,
+                    upload_preset: uploadPreset
+                })
             });
 
-            const imgbbData = await imgbbResponse.json();
+            const cloudinaryData = await cloudinaryResponse.json();
             
-            if (imgbbData.success) {
-                imageUrl = imgbbData.data.url; // URL dari ImgBB
+            if (cloudinaryData.secure_url) {
+                imageUrl = cloudinaryData.secure_url; // URL gambar anti-blokir didapatkan!
             } else {
-                return res.status(400).json({ message: 'Gagal upload gambar ke ImgBB' });
+                console.error("Cloudinary Error:", cloudinaryData);
+                return res.status(400).json({ message: 'Gagal upload gambar ke Cloudinary' });
             }
         }
 
@@ -61,7 +65,7 @@ export const getItems = async (_req, res, next) => {
         const withFullUrl = items.map(i => {
             let finalImageUrl = i.imageUrl;
             
-            // Cek jika gambar lama masih pakai /uploads/
+            // Pengaman darurat untuk gambar lama yang pakai /uploads/
             if (finalImageUrl && finalImageUrl.startsWith('/uploads/')) {
                 finalImageUrl = host + finalImageUrl;
             }
