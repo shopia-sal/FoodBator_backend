@@ -21,9 +21,8 @@ export const createItem = async (req, res, next) => {
                 body: JSON.stringify({
                     file: base64Image,
                     upload_preset: uploadPreset,
-                    public_id: uniqueName,
-                    // 👇👇👇 INI OBAT PENAWARNYA 👇👇👇
-                    display_name: uniqueName // Paksa Cloudinary pakai nama ini agar tidak error
+                    public_id: uniqueName, // Ini parameter yang resmi diizinkan
+                    folder: "foodbator_menu" // Tambahan: Biar rapi masuk ke folder khusus di Cloudinary
                 })
             });
 
